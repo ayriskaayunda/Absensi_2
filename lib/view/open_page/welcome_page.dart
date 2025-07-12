@@ -1,4 +1,4 @@
-import 'package:absensi_app/view/login_page.dart';
+import 'package:absensi_app/view/auth_page/login_page.dart';
 import 'package:flutter/material.dart';
 
 class WelcomePage extends StatelessWidget {
@@ -28,7 +28,7 @@ class WelcomePage extends StatelessWidget {
               // Untuk logo
               // Pastikan path 'assets/logo_absensi.png' sudah benar di pubspec.yaml
               Image.asset(
-                'assets/logo_absensi.png',
+                'assets/images/logo.png',
                 height: 150,
                 width: 150,
                 // Anda mungkin perlu menyesuaikan warna logo atau menambahkan filter jika tidak terlihat jelas

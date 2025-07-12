@@ -1,8 +1,8 @@
 import 'package:absensi_app/api/user_api.dart';
 import 'package:absensi_app/helper/preference.dart';
 import 'package:absensi_app/models/profile_response.dart';
-import 'package:absensi_app/view/edit_profile_page.dart';
-import 'package:absensi_app/view/login_page.dart';
+import 'package:absensi_app/view/profile_page/edit_profile_page.dart';
+import 'package:absensi_app/view/auth_page/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

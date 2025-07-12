@@ -1,7 +1,7 @@
 import 'package:absensi_app/api/user_api.dart';
 import 'package:absensi_app/models/list_batch.dart';
 import 'package:absensi_app/models/list_training.dart';
-import 'package:absensi_app/view/login_page.dart';
+import 'package:absensi_app/view/auth_page/login_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 

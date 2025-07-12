@@ -89,10 +89,6 @@ class ApiService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        final String? token = data['token'];
-        if (token != null) {
-          await Preferences.saveToken(token);
-        }
         return LoginResponse.fromJson(data);
       } else {
         print('Login failed: ${response.statusCode} - ${response.body}');
@@ -124,7 +120,14 @@ class ApiService {
         'Authorization': 'Bearer $token',
       };
 
-      final response = await http.get(url, headers: headers);
+      final response = await http
+          .get(url, headers: headers)
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              throw Exception("Request ke server timeout. Coba lagi.");
+            },
+          );
 
       print('Response Code: ${response.statusCode}');
       print('Response Body: ${response.body}');

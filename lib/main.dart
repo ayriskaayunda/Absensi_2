@@ -1,10 +1,11 @@
 import 'package:absensi_app/view/history_page.dart';
-import 'package:absensi_app/view/login_page.dart';
-import 'package:absensi_app/view/main_layout.dart';
+import 'package:absensi_app/view/auth_page/login_page.dart';
+import 'package:absensi_app/view/custom_navbar.dart';
 import 'package:absensi_app/view/map_page.dart';
-import 'package:absensi_app/view/profile_page.dart';
-import 'package:absensi_app/view/register_page.dart';
-import 'package:absensi_app/view/welcome_page.dart';
+import 'package:absensi_app/view/profile_page/profile_page.dart';
+import 'package:absensi_app/view/auth_page/register_page.dart';
+import 'package:absensi_app/view/open_page/splash_screen.dart';
+import 'package:absensi_app/view/open_page/welcome_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -28,16 +29,27 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      initialRoute: MainLayout.id,
+      initialRoute: "/",
       routes: {
-        "/": (context) => WelcomePage(),
+        "/": (context) => SplashScreen(),
+        WelcomePage.id: (context) => WelcomePage(),
         LoginPage.id: (context) => LoginPage(),
         RegisterPage.id: (context) => RegisterPage(),
-        MainLayout.id: (context) => MainLayout(),
+        CustomButtonNavBar.id: (context) => CustomButtonNavBar(),
         ProfilePage.id: (context) => ProfilePage(),
         HistoryPage.id: (context) => HistoryPage(),
         BelajarMaps.id: (context) => BelajarMaps(),
       },
+      onGenerateRoute: (settings) {
+        if (settings.name == CustomButtonNavBar.id) {
+          final index = settings.arguments as int? ?? 0;
+          return MaterialPageRoute(
+            builder: (_) => CustomButtonNavBar(currentIndex: index),
+          );
+        }
+        return null;
+      },
+
       // home: MainLayout(),
       debugShowCheckedModeBanner: false,
     );

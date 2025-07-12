@@ -1,71 +1,35 @@
 import 'package:absensi_app/api/user_api.dart';
 import 'package:absensi_app/models/profile_response.dart';
-import 'package:absensi_app/view/main_layout.dart';
+import 'package:absensi_app/view/custom_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomePageState extends State<HomePage> {
   final ApiService _apiService = ApiService();
   late Future<ProfileResponse?> _userFuture;
 
-  // --- Data Dummy (Akan diganti dengan data asli dari backend/Firebase) ---
-  String userName = "John Doe";
-  String userPosition = "Software Engineer";
-  String? profileImageUrl =
-      "https://placehold.co/100x100/007bff/ffffff?text=JD";
-  // Status kehadiran saat ini
   String _currentAttendanceStatus = "Belum Check In";
   DateTime? _lastCheckInTime;
   DateTime? _lastCheckOutTime;
+
+  String? profileImageUrl =
+      "https://placehold.co/100x100/007bff/ffffff?text=JD";
+
+  final List<Map<String, String>> _attendanceHistory = [];
+
   @override
   void initState() {
     super.initState();
     _userFuture = _apiService.getProfile();
   }
 
-  // Contoh data riwayat kehadiran
-  // Ini akan diisi dari database (misalnya Firestore)
-  final List<Map<String, String>> _attendanceHistory = [
-    {
-      "date": "05 Juli 2025",
-      "checkIn": "08:00",
-      "checkOut": "17:00",
-      "status": "Tepat Waktu",
-    },
-    {
-      "date": "04 Juli 2025",
-      "checkIn": "08:15",
-      "checkOut": "17:00",
-      "status": "Terlambat",
-    },
-    {
-      "date": "03 Juli 2025",
-      "checkIn": "07:55",
-      "checkOut": "16:45",
-      "status": "Tepat Waktu",
-    },
-    {
-      "date": "02 Juli 2025",
-      "checkIn": "08:00",
-      "checkOut": "17:05",
-      "status": "Tepat Waktu",
-    },
-    {
-      "date": "01 Juli 2025",
-      "checkIn": "08:20",
-      "checkOut": "-",
-      "status": "Belum Check-out",
-    },
-  ];
-
-  // handle Check In
   void _checkIn() {
     setState(() {
       _lastCheckInTime = DateTime.now();
@@ -73,18 +37,18 @@ class _HomeScreenState extends State<HomeScreen> {
           "Anda sudah Check In pada ${DateFormat('HH:mm').format(_lastCheckInTime!)}";
 
       _attendanceHistory.insert(0, {
-        "date": DateFormat('dd MMMMyyyy').format(_lastCheckInTime!),
+        "date": DateFormat('dd MMMM yyyy').format(_lastCheckInTime!),
         "checkIn": DateFormat('HH:mm').format(_lastCheckInTime!),
         "checkOut": "-",
         "status": "Check In Hari Ini",
       });
     });
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Anda telah berhasil Check In!')),
     );
   }
 
-  // handle Check Out
   void _checkOut() {
     if (_lastCheckInTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -98,7 +62,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentAttendanceStatus =
           "Anda sudah Check Out pada ${DateFormat('HH:mm').format(_lastCheckOutTime!)}";
 
-      // Perbarui entri terakhir di riwayat (ini hanya untuk demo)
       if (_attendanceHistory.isNotEmpty &&
           _attendanceHistory[0]["status"] == "Check In Hari Ini") {
         _attendanceHistory[0]["checkOut"] = DateFormat(
@@ -107,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _attendanceHistory[0]["status"] = "Selesai";
       }
     });
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Anda telah berhasil Check Out!')),
     );
@@ -122,41 +86,37 @@ class _HomeScreenState extends State<HomeScreen> {
           end: Alignment.bottomRight,
         ),
       ),
-
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 50),
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.blueAccent,
-                    backgroundImage: profileImageUrl != null
-                        ? NetworkImage(profileImageUrl!)
-                        : null,
-                    child: profileImageUrl == null
-                        ? const Icon(
-                            Icons.person,
-                            size: 50,
-                            color: Colors.white,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: FutureBuilder<ProfileResponse?>(
-                      future: _userFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (snapshot.hasData && snapshot.data != null) {
-                          final user = snapshot.data!;
-                          return Column(
+              FutureBuilder<ProfileResponse?>(
+                future: _userFuture,
+                builder: (context, snapshot) {
+                  print("Profile fetch status: ${snapshot.connectionState}");
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    print("Profile fetch error: ${snapshot.error}");
+                    return const Text(
+                      "Terjadi kesalahan saat memuat profil.",
+                      style: TextStyle(color: Colors.white),
+                    );
+                  } else if (snapshot.hasData && snapshot.data != null) {
+                    final user = snapshot.data!;
+                    return Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundImage: user.data?.profilePhoto != null
+                              ? NetworkImage(user.data!.profilePhoto!)
+                              : NetworkImage(profileImageUrl!),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -176,20 +136,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             ],
-                          );
-                        } else {
-                          return const Text(
-                            "Gagal memuat data",
-                            style: TextStyle(color: Colors.white),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ],
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return const Text(
+                      "Gagal memuat data.",
+                      style: TextStyle(color: Colors.white),
+                    );
+                  }
+                },
               ),
               const SizedBox(height: 30),
 
+              /// Status Kehadiran
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
@@ -237,8 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-                      if (_lastCheckInTime != null) ...[
-                        const SizedBox(height: 10),
+                      if (_lastCheckInTime != null)
                         Text(
                           'Waktu Check In: ${DateFormat('HH:mm').format(_lastCheckInTime!)}',
                           style: const TextStyle(
@@ -246,8 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.black87,
                           ),
                         ),
-                      ],
-                      if (_lastCheckOutTime != null) ...[
+                      if (_lastCheckOutTime != null)
                         Text(
                           'Waktu Check Out: ${DateFormat('HH:mm').format(_lastCheckOutTime!)}',
                           style: const TextStyle(
@@ -255,20 +214,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.black87,
                           ),
                         ),
-                      ],
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 30),
 
+              /// Tombol Aksi
               const Text(
                 'Aksi Cepat',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 15),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
@@ -282,7 +240,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        elevation: 5,
                       ),
                     ),
                   ),
@@ -299,7 +256,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        elevation: 5,
                       ),
                     ),
                   ),
@@ -307,6 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 30),
 
+              /// Riwayat Kehadiran
               const Text(
                 'Riwayat Kehadiran',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -320,12 +277,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   final entry = _attendanceHistory[index];
                   return Card(
                     margin: const EdgeInsets.only(bottom: 10),
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(12.0),
+                      padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -367,38 +320,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// --- Dummy Screen Files untuk Navigation Bar ---
-
-// lib/screens/map_screen.dart
-class MapScreen extends StatelessWidget {
-  const MapScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Halaman Map (Belum Diimplementasi)',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-// lib/screens/history_screen.dart
-class HistoryScreen extends StatelessWidget {
-  const HistoryScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Halaman Riwayat Kehadiran (Detail)',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
       ),
     );
   }

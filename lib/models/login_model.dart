@@ -1,17 +1,8 @@
-// To parse this JSON data, do
-//
-//     final loginResponse = loginResponseFromJson(jsonString);
-
-import 'dart:convert';
-
-LoginResponse loginResponseFromJson(String str) =>
-    LoginResponse.fromJson(json.decode(str));
-
-String loginResponseToJson(LoginResponse data) => json.encode(data.toJson());
+import 'package:absensi_app/models/user_model.dart';
 
 class LoginResponse {
-  String message;
-  Data data;
+  final String message;
+  final Data data;
 
   LoginResponse({required this.message, required this.data});
 
@@ -24,8 +15,8 @@ class LoginResponse {
 }
 
 class Data {
-  String token;
-  UserLogin user;
+  final String token;
+  final UserLogin user;
 
   Data({required this.token, required this.user});
 
@@ -33,48 +24,4 @@ class Data {
       Data(token: json["token"], user: UserLogin.fromJson(json["user"]));
 
   Map<String, dynamic> toJson() => {"token": token, "user": user.toJson()};
-}
-
-class UserLogin {
-  final int? id;
-  final String? name;
-  final String? email;
-  final String? jenisKelamin;
-  final dynamic emailVerifiedAt;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  UserLogin({
-    this.id,
-    this.name,
-    this.email,
-    this.jenisKelamin,
-    this.emailVerifiedAt,
-    this.createdAt,
-    this.updatedAt,
-  });
-
-  factory UserLogin.fromJson(Map<String, dynamic> json) => UserLogin(
-    id: json["id"],
-    name: json["name"],
-    email: json["email"],
-    jenisKelamin: json["jenis_kelamin"],
-    emailVerifiedAt: json["email_verified_at"],
-    createdAt: json["created_at"] != null
-        ? DateTime.parse(json["created_at"])
-        : null,
-    updatedAt: json["updated_at"] != null
-        ? DateTime.parse(json["updated_at"])
-        : null,
-  );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-    "email": email,
-    "jenis_kelamin": jenisKelamin,
-    "email_verified_at": emailVerifiedAt,
-    "created_at": createdAt?.toIso8601String(),
-    "updated_at": updatedAt?.toIso8601String(),
-  };
 }

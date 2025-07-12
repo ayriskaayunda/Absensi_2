@@ -1,7 +1,7 @@
 import 'package:absensi_app/api/user_api.dart';
 import 'package:absensi_app/helper/preference.dart';
-import 'package:absensi_app/view/main_layout.dart';
-import 'package:absensi_app/view/register_page.dart';
+import 'package:absensi_app/view/custom_navbar.dart';
+import 'package:absensi_app/view/auth_page/register_page.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -36,8 +36,6 @@ class _LoginPageState extends State<LoginPage> {
       if (response != null) {
         // Debug: cetak token dari server
         print('Login Response Token: ${response.data.token}');
-
-        // ✅ Simpan token jika tersedia
         if (response.data.token.isNotEmpty) {
           await Preferences.saveToken(response.data.token);
         }
@@ -53,9 +51,10 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
 
-        Navigator.pushReplacement(
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(builder: (context) => MainLayout()),
+          CustomButtonNavBar.id,
+          arguments: 0, // => index 0 = Home
         );
       } else {
         if (!mounted) return;
